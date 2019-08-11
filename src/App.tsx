@@ -7,6 +7,13 @@ import Product from "./Product";
 import TotalPrice from "./TotalPrice";
 import SelectedItem, {calculateTotalPriceForItem} from "./SelectedItem";
 import { ShopItem, SelectedItemProps } from "./interfaces";
+import { DndProvider, useDrop } from 'react-dnd';
+import ItemTypes from './ItemTypes';
+	
+const style: React.CSSProperties = {
+  
+  color: 'white'
+}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -77,11 +84,13 @@ const calculateTotalSum = (items: SelectedItemProps[]): number => {
     if(isNaN(items[i].quantity)){
       items[i].quantity = 0;
     }
-    sum = sum + calculateTotalPriceForItem(items[i].price ,items[i].quantity);
+    sum = sum + calculateTotalPriceForItem(items[i].price ,items[i].quantity, items[i].status) ;
 
   }
   return sum;
 }
+
+
 
 const addItemToSelection = (selectedItems: SelectedItemProps[], item: ShopItem) => {
   const existingItem = selectedItems.find(i => item.id === i.id);
@@ -94,6 +103,27 @@ const addItemToSelection = (selectedItems: SelectedItemProps[], item: ShopItem) 
 const App: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<SelectedItemProps[]>([]);
   const classes = useStyles();
+
+  // let cart = [];  
+  // cart = JSON.parse(localStorage.selectedItems); 
+
+  const [{ canDrop, isOver }, drop] = useDrop({
+    accept: ItemTypes.BOX,
+    drop: () => ({ name: 'DropHere' }),
+    collect: monitor => ({
+      isOver: monitor.isOver(),
+      canDrop: monitor.canDrop(),
+    }),
+  })
+
+  const isActive = canDrop && isOver
+  let backgroundColor = '#a19494'
+  if (isActive) {
+    backgroundColor = '#7afa7d'
+  } else if (canDrop) {
+    backgroundColor = '#f0e984'
+  }
+
 
   return (
     <div className="App">
@@ -115,12 +145,13 @@ const App: React.FC = () => {
 
             }}
           />)}
+          
         </Grid>
 
 
         <Grid item xs={6}>
           <Paper className={classes.paper}>
-            <Grid container spacing={3}>
+            <Grid ref={drop} style={{ ...style, backgroundColor }} container spacing={3}>
               <Grid item xs={12}>
                 {selectedItems.map((item, i) => <SelectedItem
                   description={item.description}
@@ -161,6 +192,7 @@ const App: React.FC = () => {
           </Paper>
         </Grid>
 
+      
       </Grid>
     </div>
   );

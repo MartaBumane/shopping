@@ -4,7 +4,10 @@ import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import ButtonBase from "@material-ui/core/ButtonBase";
+import Button from '@material-ui/core/Button';
 import "./App.css";
+import { useDrag, DragSourceMonitor } from 'react-dnd'
+import ItemTypes from './ItemTypes'
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -20,6 +23,14 @@ const useStyles = makeStyles((theme: Theme) =>
     image: {
       width: 128,
       height: 128
+      
+    },
+    button: {
+      margin: theme.spacing(1),
+      color: theme.palette.text.secondary
+    },
+    input: {
+      display: 'none',
     },
     img: {
       margin: "auto",
@@ -41,8 +52,25 @@ interface ProductProps {
 
 const Product: React.FC<ProductProps> = ({name, description, price, image, status, onSelect}) => {
     const classes = useStyles();
+
+
+    const [{ isDragging }, drag] = useDrag({
+      item: { name, type: ItemTypes.BOX },
+      end: (item: { name: string } | undefined, monitor: DragSourceMonitor) => {
+        const dropResult = monitor.getDropResult()
+        if (item && dropResult) {
+          onSelect();
+        }
+      },
+      collect: monitor => ({
+        isDragging: monitor.isDragging(),
+      }),
+    })
+    const opacity = isDragging ? 0.4 : 1
+
+
     return (
-        <Paper className={classes.paper}>
+        <Paper ref={drag} className={classes.paper}>
               <Grid container spacing={2}>
                 <Grid item>
                   <ButtonBase className={classes.image}>
@@ -69,8 +97,7 @@ const Product: React.FC<ProductProps> = ({name, description, price, image, statu
                     </Grid>
                     <Grid item>
                       
-                      <button onClick = {onSelect}>Add to cart</button> 
-                        
+                      <Button className={classes.button} onClick = {onSelect}>Add to cart</Button> 
                     </Grid>
                   </Grid>
                   <Grid item>

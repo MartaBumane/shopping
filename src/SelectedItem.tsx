@@ -4,6 +4,7 @@ import Paper from "@material-ui/core/Paper";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import { SelectedItemProps } from "./interfaces";
 import { string } from "prop-types";
+import Button from '@material-ui/core/Button';
 
 let priceWithDiscount =0;
 
@@ -18,6 +19,13 @@ const useStyles = makeStyles((theme: Theme) =>
       textAlign: "center",
       color: theme.palette.text.secondary
     },
+    button: {
+      color: theme.palette.text.secondary
+      
+    },
+    input: {
+      display: 'none',
+    },
     
     img: {
       width: 45,
@@ -31,27 +39,31 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export function calculateTotalPriceForItem(price: number, quantity: number): number{  
+export function calculateTotalPriceForItem(price: number, quantity: number, status: string): number{  
   
- 
   if(isNaN(quantity) ){
     quantity = 0;
   }
-  if(quantity%3===0){  
-    priceWithDiscount=  (price * quantity) - ((quantity/3)* price); 
-    return priceWithDiscount;
 
-  }else if (quantity%3===1 &&quantity>3){
-    return priceWithDiscount +price;
+  if(status==='Pay for 2, get 3rd one for free'){
+    if(quantity%3===0){  
+      priceWithDiscount=  (price * quantity) - ((quantity/3)* price); 
+      return priceWithDiscount;
+  
+    }else if (quantity%3===1 &&quantity>3){
+      return priceWithDiscount +price;
+    }
+    else if (quantity%3===2&&quantity>3){
+      return priceWithDiscount +price+price;
+    }
   }
-  else if (quantity%3===2&&quantity>3){
-    return priceWithDiscount +price+price;
-  }
+ 
+  
   return price * quantity;
 }
 
 
-const SelectedItem: React.FC<SelectedItemProps & { onRemove: () => void } & { updateQuantity: (num: number) => void }& {image:string}>=({name, price, quantity, onRemove, updateQuantity, image})=>{
+const SelectedItem: React.FC<SelectedItemProps & { onRemove: () => void } & { updateQuantity: (num: number) => void }& {image:string}>=({name, price, quantity, onRemove, updateQuantity, image, status})=>{
   const classes = useStyles();
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -79,22 +91,18 @@ const SelectedItem: React.FC<SelectedItemProps & { onRemove: () => void } & { up
                     <input  value={quantity} onChange={handleChange}/>
                       pcs.
                   </form>
-
-
-
-
                 </Grid>
                 <Grid item>
-                    {calculateTotalPriceForItem(price, quantity)} Eur
+                    {calculateTotalPriceForItem(price, quantity, status)} Eur
                 </Grid> 
                 <Grid item>
-                    <button onClick={() => updateQuantity(quantity-1)}>-</button>
+                    <Button className={classes.button}  onClick={() => updateQuantity(quantity-1)}>-</Button>
                 </Grid>  
                 <Grid item>
-                    <button onClick={() =>updateQuantity(quantity+1)}>+</button>
+                    <Button className={classes.button}  onClick={() =>updateQuantity(quantity+1)}>+</Button>
                 </Grid>  
                 <Grid item>
-                    <button onClick = {onRemove}>Remove</button>
+                    <Button className={classes.button}  onClick = {onRemove}>Remove</Button>
                 </Grid>  
             </Grid>
         </Paper>
