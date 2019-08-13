@@ -3,7 +3,6 @@ import { Grid } from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import { SelectedItemProps } from "./interfaces";
-import { string } from "prop-types";
 import Button from '@material-ui/core/Button';
 
 let priceWithDiscount =0;
@@ -24,7 +23,7 @@ const useStyles = makeStyles((theme: Theme) =>
       
     },
     input: {
-      display: 'none',
+      color: theme.palette.text.secondary
     },
     
     img: {
@@ -88,7 +87,7 @@ const SelectedItem: React.FC<SelectedItemProps & { onRemove: () => void } & { up
                 </Grid>
                 <Grid item>
                   <form>
-                    <input  value={quantity} onChange={handleChange}/>
+                    <input  value={quantity} className={classes.input} onChange={handleChange}/>
                       pcs.
                   </form>
                 </Grid>

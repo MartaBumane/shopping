@@ -50,7 +50,7 @@ interface ProductProps {
     onSelect(): void
 }
 
-const Product: React.FC<ProductProps> = ({name, description, price, image, status, onSelect}) => {
+const Product: React.FC<ProductProps> = ({name, description, price, image,status, onSelect}) => {
     const classes = useStyles();
 
 
@@ -66,7 +66,6 @@ const Product: React.FC<ProductProps> = ({name, description, price, image, statu
         isDragging: monitor.isDragging(),
       }),
     })
-    const opacity = isDragging ? 0.4 : 1
 
 
     return (
@@ -93,6 +92,7 @@ const Product: React.FC<ProductProps> = ({name, description, price, image, statu
                       <Typography  variant="body2" gutterBottom >
                         {status}
                       </Typography>
+                      
                       
                     </Grid>
                     <Grid item>

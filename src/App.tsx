@@ -9,9 +9,10 @@ import SelectedItem, {calculateTotalPriceForItem} from "./SelectedItem";
 import { ShopItem, SelectedItemProps } from "./interfaces";
 import { DndProvider, useDrop } from 'react-dnd';
 import ItemTypes from './ItemTypes';
-	
-const style: React.CSSProperties = {
-  
+
+
+
+const style: React.CSSProperties = {  
   color: 'white'
 }
 
@@ -34,7 +35,19 @@ const useStyles = makeStyles((theme: Theme) =>
       display: "block",
       maxWidth: "100%",
       maxHeight: "100%"
+    },
+    search: {
+      backgroundColor: '#a19494',
+      display: 'flex',
+      justifyContent: 'flex-end'
+    },
+    header: {
+      backgroundColor: '#635757',
+      color: 'white',
+      padding: theme.spacing(2),
+      fontSize: 30
     }
+
   })
 );
 
@@ -90,23 +103,55 @@ const calculateTotalSum = (items: SelectedItemProps[]): number => {
   return sum;
 }
 
+const updateLocalStorage=(selectedItems: SelectedItemProps[]): void=>{
+
+  localStorage.setItem("savedData", JSON.stringify(selectedItems));
+
+}
+const deleteLocalStorage = ():void=>{
+  localStorage.clear();
+  
+}
+
+const deleteAllItemsFromCart = (selectedItems: SelectedItemProps[]):SelectedItemProps[]=>{
+  const clearedArray  = selectedItems;
+  while(clearedArray.length > 0) {
+    clearedArray.pop();
+  }
+  return clearedArray;
+}
+
+
 
 
 const addItemToSelection = (selectedItems: SelectedItemProps[], item: ShopItem) => {
   const existingItem = selectedItems.find(i => item.id === i.id);
   if (existingItem) {
-    return selectedItems.map(i => i === existingItem ? { ...existingItem, quantity: existingItem.quantity + 1 } : i)
+    let itemWithchangedValue = selectedItems.map(i => i === existingItem ? { ...existingItem, quantity: existingItem.quantity + 1 } : i)
+    
+    return itemWithchangedValue;
   }
+
   return [...selectedItems, { ...item, quantity: 1 }]
 }
 
+let dataFromLocalStorage = localStorage.getItem("savedData");
+let initialItems: SelectedItemProps[] = [];
+if(dataFromLocalStorage){
+  initialItems = JSON.parse(dataFromLocalStorage);
+}
+
 const App: React.FC = () => {
-  const [selectedItems, setSelectedItems] = useState<SelectedItemProps[]>([]);
+
+  const [selectedItems, setSelectedItems] = useState<SelectedItemProps[]>(initialItems);
   const classes = useStyles();
-
-  // let cart = [];  
-  // cart = JSON.parse(localStorage.selectedItems); 
-
+  
+  let searchValue = '';
+  function handleSearch(event: React.ChangeEvent<HTMLInputElement>) {
+    let value: string = event.target.value;
+    searchValue= value;
+  }
+  
   const [{ canDrop, isOver }, drop] = useDrop({
     accept: ItemTypes.BOX,
     drop: () => ({ name: 'DropHere' }),
@@ -116,36 +161,41 @@ const App: React.FC = () => {
     }),
   })
 
-  const isActive = canDrop && isOver
+  const isActive = canDrop && isOver;
   let backgroundColor = '#a19494'
   if (isActive) {
     backgroundColor = '#7afa7d'
   } else if (canDrop) {
     backgroundColor = '#f0e984'
   }
-
-
+  
+  
   return (
     <div className="App">
         
       <Grid container spacing={3}>
       <Grid item xs={12}>
-          <Paper className={classes.paper}>SUSHI SHOP</Paper>
+          <Paper className={classes.header}>SUSHI SHOP</Paper>
         </Grid>
 
         <Grid item xs={6}>
-          {items.map(item => <Product
-            status = {item.status}
-            name={item.name}
-            description={item.description}
-            price={item.price}
-            image={item.image}
-            onSelect={() => {
-              setSelectedItems(addItemToSelection(selectedItems, item));
-
-            }}
-          />)}
+          <Paper className={classes.search}>
+            <form>
+              <input  className={classes.paper} placeholder={"Search..."} value={searchValue} onChange={handleSearch}/>                
+            </form></Paper>
           
+              {items.map(item => <Product
+                status = {item.status}
+                name={item.name}
+                description={item.description}
+                price={item.price}
+                image={item.image}
+                onSelect={() => {
+                  const selected = addItemToSelection(selectedItems, item);
+                  setSelectedItems(selected);
+                  updateLocalStorage(selected);
+                }}
+          />)}          
         </Grid>
 
 
@@ -163,30 +213,42 @@ const App: React.FC = () => {
                   quantity={item.quantity}
                   onRemove={() => {
                     selectedItems.splice(i, 1)
-                    setSelectedItems([...selectedItems]);
+                    const selected =[...selectedItems];
+                    setSelectedItems(selected);
+                    updateLocalStorage(selected);
                   }}
                   updateQuantity={(number: number) => {
                     if (number < selectedItems[i].quantity) {
                       if (selectedItems[i].quantity === 1) {
                         selectedItems.splice(i, 1)
-                        setSelectedItems([...selectedItems]);
+                        const selected =[...selectedItems];
+                        setSelectedItems(selected);
+                        updateLocalStorage(selected);
                       } else {
                         selectedItems[i].quantity = number;
-                        setSelectedItems([...selectedItems]);
+                        const selected =[...selectedItems];
+                        setSelectedItems(selected);
+                        updateLocalStorage(selected);
                       }
                     } else {
                       selectedItems[i].quantity = number;
-                      setSelectedItems([...selectedItems]);
+                      const selected =[...selectedItems];
+                      setSelectedItems(selected);
+                      updateLocalStorage(selected);
                     }
                   }}
-
-
                 />)}
-
               </Grid>
 
+
               <Grid item xs={12}>
-                <TotalPrice price={calculateTotalSum(selectedItems)} />
+                <TotalPrice price={calculateTotalSum(selectedItems)} 
+                clear={() => {
+                  deleteLocalStorage();
+                  const clearedCart = [...deleteAllItemsFromCart(selectedItems)];
+                  console.log(clearedCart)
+                  setSelectedItems(clearedCart);                  
+                  }} />
               </Grid>
             </Grid>
           </Paper>
