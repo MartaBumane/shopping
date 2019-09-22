@@ -37,6 +37,28 @@ const useStyles = makeStyles((theme: Theme) =>
       display: "block",
       maxWidth: "100%",
       maxHeight: "100%"
+    },
+
+    inStock: {
+      color: theme.palette.text.secondary, 
+      fontSize: 12
+    },
+
+    status: {
+      color: '#f55151'
+    }, 
+
+    fewItemsLeft: {
+      backgroundColor: '#ed473b', 
+      color: 'white', 
+      padding: 8, 
+      fontSize: 12,
+      borderRadius: '10%',    
+   
+    }, 
+
+    displayNone: {
+      display: 'none'
     }
   })
 );
@@ -47,10 +69,11 @@ interface ProductProps {
     price: number;
     image: string;
     status: string;
-    onSelect(): void
+    onSelect(): void;
+    inStock:number;
 }
 
-const Product: React.FC<ProductProps> = ({name, description, price, image,status, onSelect}) => {
+const Product: React.FC<ProductProps> = ({name, description, price, image,status, onSelect, inStock}) => {
     const classes = useStyles();
 
 
@@ -72,6 +95,7 @@ const Product: React.FC<ProductProps> = ({name, description, price, image,status
         <Paper ref={drag} className={classes.paper}>
               <Grid container spacing={2}>
                 <Grid item>
+                 
                   <ButtonBase className={classes.image}>
                     <img
                       className={classes.img}
@@ -79,6 +103,11 @@ const Product: React.FC<ProductProps> = ({name, description, price, image,status
                       src={image}
                     />
                   </ButtonBase>
+
+                  <div className={inStock> 5 ? classes.displayNone : classes.fewItemsLeft}>
+                    <span className={inStock> 5 ? classes.displayNone : inStock===0 ? classes.displayNone : classes.fewItemsLeft}>Only {inStock} left</span>
+                    <span className={inStock===0 ? classes.fewItemsLeft: classes.displayNone}>Out of stock</span>
+                  </div>
                 </Grid>
                 <Grid item xs={12} sm container>
                   <Grid item xs container direction="column" spacing={2}>
@@ -89,15 +118,18 @@ const Product: React.FC<ProductProps> = ({name, description, price, image,status
                       <Typography variant="body2" gutterBottom>                       
                         {description}
                       </Typography>
-                      <Typography  variant="body2" gutterBottom >
+                      <Typography className={classes.status} variant="body2" gutterBottom >
                         {status}
                       </Typography>
                       
                       
                     </Grid>
-                    <Grid item>
+                    <Grid item>                      
+                      <Button disabled={inStock===0 ? true : false} className={classes.button} onClick = {onSelect}>Add to cart</Button> 
                       
-                      <Button className={classes.button} onClick = {onSelect}>Add to cart</Button> 
+                    </Grid>
+                    <Grid item className={classes.inStock}>
+                      {inStock} available
                     </Grid>
                   </Grid>
                   <Grid item>

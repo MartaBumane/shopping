@@ -5,6 +5,7 @@ export interface ShopItem{
   image: string;
   id: number;
   status: string;
+  inStock: number;
 }
 
 export type SelectedItemProps = ShopItem & {
